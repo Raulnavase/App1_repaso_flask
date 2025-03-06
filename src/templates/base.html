@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{% endblock %}</title>
+</head>
+<body>
+    <nav>
+        <span><a href="{{ url_for('home') }}">Home</a></span>
+        
+        {% if current_user.is_authenticated %}
+            <span><a href="{{ url_for('profile') }}">Profile</a></span>
+            <span><a href="{{ url_for('logout') }}">Logout</a></span>
+        {% else %}
+            <span><a href="{{ url_for('login') }}">Login</a></span>
+            <span><a href="{{ url_for('register') }}">Register</a></span>
+        {% endif %}
+    </nav>
+    <header>
+        {% block header %}{% endblock %}
+    </header>
+    <main>
+        {% for message in get_flashed_messages() %}
+            <div>{{ message }}</div>
+        {% endfor %}
+        {% block content %}{% endblock %}
+    </main>
+    <footer>
+        <h3>Footer</h3>
+    </footer>
+</body>
+</html>

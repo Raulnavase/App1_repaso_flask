@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block header %}
+    <h1>{% block title %}Admin{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+    <h1>Panel de admin</h1>
+
+    <button><a href="{{ url_for('usuarios') }}">USUARIOS</a></button>
+    <button><a href="{{ url_for('productos') }}">PRODUCTOS</a></button>
+{% endblock %}
