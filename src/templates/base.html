@@ -10,6 +10,9 @@
         <span><a href="{{ url_for('home') }}">Home</a></span>
         
         {% if current_user.is_authenticated %}
+            {% if current_user.rol == "admin" %}
+            <span><a href="{{ url_for('admin') }}">Panel admin</a></span>
+            {% endif %}
             <span><a href="{{ url_for('profile') }}">Profile</a></span>
             <span><a href="{{ url_for('logout') }}">Logout</a></span>
         {% else %}
@@ -27,6 +30,7 @@
         {% block content %}{% endblock %}
     </main>
     <footer>
+        <br><hr><br>
         <h3>Footer</h3>
     </footer>
 </body>

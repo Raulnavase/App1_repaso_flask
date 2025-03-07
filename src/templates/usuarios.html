@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block header %}
+    <h1>{% block title %}Usuarios{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+    <button><a href="{{ url_for('add_user') }}">AÑADIR</a></button>
+    <br><br>
+    <hr>
+    <br>
+    
+    {% if msg %}
+        <h3>{{ msg }}</h3>
+    {% else %}
+    <table>
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Username</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for p in usuarios %}
+                <tr>
+                    <td>{{ p.name }}</td>
+                    <td>{{ p.username }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+    <br><hr><br>
+    <a href="{{ url_for('admin') }}">Volver</a>
+{% endblock %}

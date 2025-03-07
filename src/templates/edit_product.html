@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block header %}
+    <h1>{% block title %}Edit Product{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+    {% for p in product %}
+    <form method="POST">
+        <input value="{{ p.name }}" type="text" name="name" placeholder="Nombre">
+        <textarea
+        style="resize: none; height: 15vh; width: 20vw;"
+        name="description"
+        placeholder="Descripción del producto...">{{ p.description }}</textarea>
+        <input value="{{ p.price }}" type="number" name="price" placeholder="Precio €">
+        <input value="{{ p.img }}" type="url" name="img" placeholder="Url de la imagen">
+
+        <button type="submit">Actualizar</button>
+    </form>
+    {% endfor %}
+    <br>
+    <a href="{{ url_for('productos') }}">Cancelar</a>
+{% endblock %}

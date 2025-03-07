@@ -26,6 +26,8 @@ class User(UserMixin):
         self.id = str(user_data['_id'])
         self.name = user_data['name']
         self.username = user_data['username']
+        self.rol = user_data['rol']
+
 
 @login_manager.user_loader
 def load_user(id):
@@ -86,7 +88,7 @@ def register():
             return redirect(url_for('register'))
 
         hashed_password = generate_password_hash(password)
-        users_collection.insert_one({ "name": name, "username": username, "password": hashed_password })
+        users_collection.insert_one({ "name": name, "username": username, "password": hashed_password, "rol": "user" })
 
         flash("Usuario registrado correctamente! Ya puedes iniciar sesión.", "success")
         return redirect(url_for("login"))
@@ -103,32 +105,123 @@ def profile():
 @app.route('/admin', methods=['GET', 'POST'])
 @login_required
 def admin():
-    if current_user.username != 'admin':
+    if current_user.rol != 'admin':
         return redirect(url_for('home'))
     
     return render_template('admin.html')
 
+# ---------------------------------------------------------------------------------------------
 
 @app.route('/usuarios', methods=['GET', 'POST'])
 @login_required
 def usuarios():
-    if current_user.username != 'admin':
-        if not users_collection.find():
-            flash("NO HAY NADA")
+    if current_user.rol != 'admin':
+        return redirect(url_for('home'))
 
-        
-
-            
+    if users_collection.count_documents({}) == 0:
+        return render_template("usuarios.html", msg="No hay usuarios")
     
+    data = users_collection.find({ "rol": "user" })
+    return render_template('usuarios.html', usuarios=data)
+    
+
+@app.route('/add_user', methods=['GET', 'POST'])
+@login_required
+def add_user():
+    if current_user.rol != 'admin':
         return redirect(url_for('home'))
     
+    if request.method == 'POST':
+        name = request.form['name']
+        username = request.form['username']
+        password = request.form['password']
+        rol = request.form['rol']
+
+        if not name or not username or not password:
+            flash("Por favor, completa todos los campos.", "warning")
+            return redirect(url_for('add_user'))
+        
+        hashed_password = generate_password_hash(password)
+        users_collection.insert_one({ "name": name, "username": username, "password": password, "rol": rol })
+
+        flash("Usuario agregado con exito!", "success")
+    
+    return render_template("add_user.html")
+
+# ---------------------------------------------------------------------------------------------
+
+@app.route('/productos', methods=['GET', 'POST'])
+@login_required
+def productos():
+    if current_user.rol != 'admin':
+        return redirect(url_for('home'))
+
+    if mouses_collection.count_documents({}) == 0:
+        return render_template("productos.html", msg="No hay productos")
+    
+    data = mouses_collection.find()
+    return render_template('productos.html', productos=data)
 
 
+@app.route('/add_product', methods=['GET', 'POST'])
+@login_required
+def add_product():
+    if current_user.rol != "admin":
+        return redirect(url_for('home'))
+    
+    if request.method == 'POST':
+        name = request.form['name']
+        description = request.form['description']
+        price = request.form['price']
+        img = request.form['img']
+
+        if not name or not description or not price or not img:
+            flash("Completa todos los campos", "danger")
+            return redirect(url_for('add_product'))
+
+        mouses_collection.insert_one({ "name": name, "description": description, "price": price, "img": img })
+        flash("Producto agregado correctamente!", "success")
+
+    return render_template("add_product.html")
 
 
+@app.route('/delete_product/<string:id>')
+@login_required
+def delete_product(id):
+    if current_user.rol != "admin":
+        return redirect(url_for('home'))
+    
+    mouses_collection.delete_one({ "_id": ObjectId(id) })
+    flash("Producto eliminado correctamente", "success")
+    return redirect(url_for('productos'))
+
+@app.route('/edit_product/<string:id>', methods=['GET', 'POST'])
+@login_required
+def edit_product(id):
+    if current_user.rol != "admin":
+        return redirect(url_for('home'))
+    
+    if request.method == 'POST':
+        name = request.form['name']
+        description = request.form['description']
+        price = request.form['price']
+        img = request.form['img']
+
+        if not name or not description or not price or not img:
+            flash("Completa todos los campos")
+            return redirect(url_for('edit_product'))
+
+        mouses_collection.update_one({ "_id": ObjectId(id) },
+                                     { "$set": { "name": name, "description": description, "price": price, "img": img } })
+    
+        flash("Producto actualizado!", "success")
+        return redirect(url_for('productos'))
+
+    data = mouses_collection.find({ "_id": ObjectId(id) })
+    return render_template("edit_product.html", product=data)
 
 
-
+# ---------------------------------------------------------------------------------------------
 
 
 @app.route('/logout')
